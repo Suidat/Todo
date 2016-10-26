@@ -2,6 +2,7 @@ package tikape4;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -17,9 +18,10 @@ public class TekijaDao {
 
     public void luoTekija(String nimi) throws Exception {
         Connection conn = DriverManager.getConnection(tietokantaosoite);
-        Statement stmt = conn.createStatement();
-        stmt.execute("INSERT INTO Tekija(nimi) "
-                + "VALUES ('" + nimi + "')");
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO Tekija(nimi) "
+                + "VALUES ( ? )");
+        stmt.setString(1, nimi);
+        stmt.execute();
 
         conn.close();
 

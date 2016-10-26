@@ -2,6 +2,7 @@ package tikape4;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -38,8 +39,9 @@ public class TodoDao {
 
     public List<Todo> haeTodot(int tekijanId) throws Exception {
         Connection conn = DriverManager.getConnection(tietokantaosoite);
-        Statement stmt = conn.createStatement();
-        ResultSet result = stmt.executeQuery("SELECT * FROM Todo WHERE tekija_id = " + tekijanId);
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Todo WHERE tekija_id = ?");
+        stmt.setInt(1, tekijanId);
+        ResultSet result = stmt.executeQuery();
 
         List<Todo> tehtavat = new ArrayList<>();
 
@@ -59,17 +61,16 @@ public class TodoDao {
 
     public void lisaa(String tehtava) throws Exception {
         Connection conn = DriverManager.getConnection(tietokantaosoite);
-        Statement stmt = conn.createStatement();
-        stmt.execute("INSERT INTO Todo (task, done) "
-                + "VALUES ('" + tehtava + "', 0)");
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO Todo (task, done) "
+                + "VALUES (?, 0)");
+        stmt.setString(1, tehtava);
+        stmt.execute();
 
         conn.close();
 
     }
 
     public void poista(String id) throws Exception {
-        Connection conn = DriverManager.getConnection(tietokantaosoite);
-        Statement stmt = conn.createStatement();
         try {
             Integer.parseInt(id);
         } catch (Throwable t) {
@@ -78,16 +79,25 @@ public class TodoDao {
         // 1%20OR%201=1
         // 1 OR 1=1
         // DELETE FROM Todo WHERE id = 1 OR 1=1
-        stmt.execute("DELETE FROM Todo WHERE id = " + id);
+        Connection conn = DriverManager.getConnection(tietokantaosoite);
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM Todo WHERE id = ?");
+        stmt.setInt(1, Integer.parseInt(id));
+        stmt.execute();
         conn.close();
     }
 
     public void lisaa(String id, String tehtava) throws Exception {
+        try {
+            Integer.parseInt(id);
+        } catch (Throwable t) {
+            return;
+        }
         Connection conn = DriverManager.getConnection(tietokantaosoite);
-        Statement stmt = conn.createStatement();
-        stmt.execute(
-                "INSERT INTO Todo (task, done, tekija_id) "
-                + "VALUES ('" + tehtava + "', 0, " + Integer.parseInt(id) + ")");
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO Todo (task, done, tekija_id) "
+                + "VALUES (?, 0, ?)");
+        stmt.setString(1, tehtava);
+        stmt.setInt(2, Integer.parseInt(id));
+        stmt.execute();
 
         conn.close();
 
