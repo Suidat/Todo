@@ -59,6 +59,17 @@ public class TodoDao {
         return tehtavat;
     }
 
+    public int haeTekija(int key) throws Exception {
+        Connection conn = DriverManager.getConnection(tietokantaosoite);
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Todo WHERE id = ?");
+        stmt.setInt(1, key);
+        ResultSet result = stmt.executeQuery();
+        int id = result.getInt("tekija_id");
+
+        conn.close();
+        return id;
+    }
+
     public void lisaa(String tehtava) throws Exception {
         Connection conn = DriverManager.getConnection(tietokantaosoite);
         PreparedStatement stmt = conn.prepareStatement("INSERT INTO Todo (task, done) "
@@ -101,5 +112,13 @@ public class TodoDao {
 
         conn.close();
 
+    }
+
+    public void tehty(int key) throws Exception {
+        Connection conn = DriverManager.getConnection(tietokantaosoite);
+        PreparedStatement stmt = conn.prepareStatement("UPDATE Todo SET done = 1 WHERE id = ?");
+        stmt.setInt(1, key);
+        stmt.execute();
+        conn.close();
     }
 }

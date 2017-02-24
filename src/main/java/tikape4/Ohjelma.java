@@ -18,23 +18,30 @@ public class Ohjelma {
         port(getHerokuAssignedPort());
 
         // Database ... 
-        
         TodoDao todoDao = new TodoDao("jdbc:sqlite:todo.db");
         TekijaDao tekijaDao = new TekijaDao("jdbc:sqlite:todo.db");
-        
+
         Spark.get("/", (req, res) -> {
             res.redirect("/tekijat");
             return "ok";
         });
-        
+
         Spark.get("/tehtavat/poista/:id", (req, res) -> {
+            int id = todoDao.haeTekija(Integer.parseInt(req.params(":id")));
             todoDao.poista(req.params(":id"));
-            res.redirect("/");
+            res.redirect("/tekijat/" + id);
+            return "ok";
+        });
+
+        Spark.get("/tekijat/poista/:id", (req, res) -> {
+            tekijaDao.poistaTekija(Integer.parseInt(req.params(":id")));
+            res.redirect("/tekijat");
             return "ok";
         });
 
         Spark.get("/tehtavat", (req, res) -> {
             HashMap data = new HashMap<>();
+
             data.put("tehtavat", todoDao.haeTodot());
 
             return new ModelAndView(data, "index");
@@ -45,21 +52,24 @@ public class Ohjelma {
             res.redirect("/");
             return "ok";
         });
-        
+
         Spark.get("/tekijat", (req, res) -> {
             HashMap data = new HashMap<>();
+
             data.put("tekijat", tekijaDao.haeTekijat());
 
             return new ModelAndView(data, "tekijat");
         }, new ThymeleafTemplateEngine());
-        
+
         Spark.get("/tekijat/:id", (req, res) -> {
             HashMap data = new HashMap<>();
-            data.put("tehtavat", todoDao.haeTodot(Integer.parseInt(req.params(":id"))));
+            int id = Integer.parseInt(req.params(":id"));
+            data.put("tekija", tekijaDao.haeYksi(id));
+            data.put("tehtavat", todoDao.haeTodot(id));
 
             return new ModelAndView(data, "index");
         }, new ThymeleafTemplateEngine());
-        
+
         Spark.post("/tekijat", (req, res) -> {
             tekijaDao.luoTekija(req.queryParams("nimi"));
             res.redirect("/");
@@ -67,13 +77,20 @@ public class Ohjelma {
         });
 
         Spark.post("/tekijat/:id", (req, res) -> {
-            todoDao.lisaa(req.params(":id"), 
+            todoDao.lisaa(req.params(":id"),
                     req.queryParams("tehtava"));
 
             res.redirect("/tekijat/" + req.params(":id"));
             return "ok";
         });
         
+        Spark.get("/tehtavat/tehty/:id", (req, res) ->{
+            todoDao.tehty(Integer.parseInt(req.params(":id")));
+            res.redirect("/tekijat/"+todoDao.haeTekija(Integer.parseInt(req.params(":id"))));
+            return "ok";
+        });
+        
+
     }
 
     static int getHerokuAssignedPort() {

@@ -4,10 +4,15 @@
         <title>Mahtavin TODO-sovellus</title>
     </head>
     <body>
+        <span th:text="${tekija.nimi}">tyyppi</span>
         <ul>
+            
             <li th:each="tehtava : ${tehtavat}">
-                <span th:text="${tehtava.task}">tehtava</span>
-                <a th:href="@{~/tehtavat/poista/{id}(id=${tehtava.id})}">poista</a>
+                <div th:switch ="${tehtava.done}">
+                    <p th:case ="true" ><strike><span th:text="${tehtava.task}">tehtava</span></strike> <a th:href="@{~/tehtavat/poista/{id}(id=${tehtava.id})}">poista</a></p>
+                        <p th:case ="false" > <a th:href="@{~/tehtavat/tehty/{id}(id=${tehtava.id})}">Merkitse tehdyksi</a> <span th:text="${tehtava.task}">tehtava</span> <a th:href="@{~/tehtavat/poista/{id}(id=${tehtava.id})}">poista</a> </p>
+                </div>
+                
             </li>
         </ul>
 

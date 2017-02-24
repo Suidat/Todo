@@ -27,6 +27,19 @@ public class TekijaDao {
 
     }
 
+    public Tekija haeYksi(int key) throws Exception {
+        Connection conn = DriverManager.getConnection(tietokantaosoite);
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Tekija WHERE id = ?");
+        stmt.setObject(1, key);
+        ResultSet result = stmt.executeQuery();
+        int id = result.getInt("id");
+        String nimi = result.getString("nimi");
+        Tekija tyyppi = new Tekija(id, nimi);
+        conn.close();
+        result.close();
+        return tyyppi;
+    }
+
     public List<Tekija> haeTekijat() throws Exception {
         Connection conn = DriverManager.getConnection(tietokantaosoite);
         Statement stmt = conn.createStatement();
@@ -37,7 +50,7 @@ public class TekijaDao {
         while (result.next()) {
             String nimi = result.getString("nimi");
             int id = result.getInt("id");
-            
+
             Tekija tekija = new Tekija(id, nimi);
             tekijat.add(tekija);
         }
@@ -46,4 +59,17 @@ public class TekijaDao {
 
         return tekijat;
     }
+    
+    public void poistaTekija(int key) throws Exception{
+        Connection conn = DriverManager.getConnection(tietokantaosoite);
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM Tekija WHERE id = ?");
+        PreparedStatement stmt2 = conn.prepareStatement("DELETE FROM Todo WHERE tekija_id = ?");
+        stmt.setInt(1, key);        
+        stmt2.setInt(1, key);        
+        stmt.execute();
+        stmt2.execute();
+        conn.close();
+
+    }
+    
 }

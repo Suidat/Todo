@@ -7,9 +7,16 @@
         <ul>
             <li th:each="tekija: ${tekijat}">
                 <a th:href="@{~/tekijat/{id}(id=${tekija.id})}" 
-                   th:text="${tekija.nimi}">Tekijä</a>
+                   th:text="${tekija.nimi}">Tekijä</a>  <a th:href="@{~/tekijat/poista/{id}(id=${tekija.id})}">poista</a>
             </li>
         </ul>
+        
+        
+        <form method="POST">
+            <input type="text" name="nimi"/>
+            <input type="submit" value="lisää!"/>
+        </form>
+
 
     </body>
 </html>
